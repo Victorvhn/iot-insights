@@ -1,5 +1,7 @@
 using System.Reflection;
+using Asp.Versioning;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using SharpGrip.FluentValidation.AutoValidation.Endpoints.Extensions;
 
 namespace IoT.Insights.Api.Infrastructure.Routing;
 
@@ -20,22 +22,43 @@ internal static class Extensions
 
         return services;
     }
-    
-    public static IApplicationBuilder MapEndpoints(
-        this WebApplication app,
-        RouteGroupBuilder? routeGroupBuilder = null)
+
+    public static IApplicationBuilder MapEndpoints(this WebApplication app)
     {
         var endpoints = app.Services
             .GetRequiredService<IEnumerable<IEndpoint>>();
 
-        IEndpointRouteBuilder builder =
-            routeGroupBuilder is null ? app : routeGroupBuilder;
+        var apiVersionSet = app.NewApiVersionSet()
+            .HasApiVersion(new ApiVersion(1))
+            .ReportApiVersions()
+            .Build();
 
-        foreach (var endpoint in endpoints)
-        {
-            endpoint.MapEndpoint(builder);
-        }
+        var versionedGroup = app
+            .MapGroup("api/v{version:apiVersion}")
+            .WithApiVersionSet(apiVersionSet)
+            .AddFluentValidationAutoValidation();
+
+        foreach (var endpoint in endpoints) endpoint.MapEndpoint(versionedGroup);
 
         return app;
+    }
+
+    public static void AddApiVersions(this IServiceCollection services)
+    {
+        services.AddApiVersioning(options =>
+            {
+                options.DefaultApiVersion = new ApiVersion(1, 0);
+                options.AssumeDefaultVersionWhenUnspecified = true;
+                options.ReportApiVersions = true;
+                options.ApiVersionReader = ApiVersionReader.Combine(new UrlSegmentApiVersionReader(),
+                    new HeaderApiVersionReader("x-api-version"),
+                    new MediaTypeApiVersionReader("x-api-version"));
+            })
+            .AddMvc()
+            .AddApiExplorer(options =>
+            {
+                options.GroupNameFormat = "'v'VVV";
+                options.SubstituteApiVersionInUrl = true;
+            });
     }
 }

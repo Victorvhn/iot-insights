@@ -1,42 +1,31 @@
-using Asp.Versioning;
+using IoT.Insights.Api.Infrastructure.Authentication;
+using IoT.Insights.Api.Infrastructure.Documentation;
 using IoT.Insights.Api.Infrastructure.Routing;
+using IoT.Insights.Api.Infrastructure.Validation;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
-
-builder.Services.AddApiVersioning(options =>
-{
-    options.DefaultApiVersion = new ApiVersion(1);
-    options.ApiVersionReader = new UrlSegmentApiVersionReader();
-}).AddApiExplorer(options =>
-{
-    options.GroupNameFormat = "'v'V";
-    options.SubstituteApiVersionInUrl = true;
-});
-
+builder.Services.AddSwagger();
+builder.Services.AddFluentValidation(typeof(Program));
+builder.Services.AddApiVersions();
 builder.Services.AddEndpoints(typeof(Program).Assembly);
+builder.Services.AddAuthentication(builder.Configuration);
+builder.Services.AddMediator();
 
 var app = builder.Build();
 
-var apiVersionSet = app.NewApiVersionSet()
-    .HasApiVersion(new ApiVersion(1))
-    .ReportApiVersions()
-    .Build();
+app.MapEndpoints();
 
-var versionedGroup = app
-    .MapGroup("api/v{version:apiVersion}")
-    .WithApiVersionSet(apiVersionSet);
+app.UseAuthentication();
+app.UseAuthorization();
 
-app.MapEndpoints(versionedGroup);
-
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
-
+app.UseSwaggerWithVersions();
 app.UseHttpsRedirection();
 
 app.Run();
+
+/// <summary>
+///     The entry point for the application.
+/// </summary>
+public partial class Program; // For testing purposes
