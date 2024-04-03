@@ -27,8 +27,9 @@ internal class Endpoint : IEndpoint
             .WithName("SignIn")
             .WithDescription("Returns an api access token for the provided credentials.")
             .WithTags(Tags)
-            .Produces<SignInResponse>(StatusCodes.Status200OK)
+            .Produces<SignInResponse>()
             .Produces<ProblemDetails>(StatusCodes.Status400BadRequest)
+            .Produces(StatusCodes.Status500InternalServerError)
             .WithOpenApi()
             .AllowAnonymous();
     }
