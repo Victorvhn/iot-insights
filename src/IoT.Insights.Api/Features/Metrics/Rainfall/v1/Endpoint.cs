@@ -10,20 +10,21 @@ internal class Endpoint : IEndpoint
 
     public void MapEndpoint(IEndpointRouteBuilder app)
     {
-        app.MapGet("metrics/rainfall", async (HttpContext context, ISender sender) =>
-            {
-                var request = new GetRainfallMetricsRequest();
-
-                var result = await sender.Send(request);
-
-                return result switch
+        app.MapGet("metrics/rainfall",
+                async (HttpContext context, ISender sender, CancellationToken cancellationToken) =>
                 {
-                    { IsFailed: true } => Results.Problem(statusCode: 400, instance: context.Request.Path,
-                        detail: string.Join(", ", result.Errors.Select(s => s.Message))),
-                    { IsSuccess: true } => Results.Ok(result.Value),
-                    _ => null
-                };
-            })
+                    var request = new GetRainfallMetricsRequest();
+
+                    var result = await sender.Send(request, cancellationToken);
+
+                    return result switch
+                    {
+                        { IsFailed: true } => Results.Problem(statusCode: 400, instance: context.Request.Path,
+                            detail: string.Join(", ", result.Errors.Select(s => s.Message))),
+                        { IsSuccess: true } => Results.Ok(result.Value),
+                        _ => null
+                    };
+                })
             .WithName("RainfallMetrics")
             .WithDescription("Returns rainfall metrics for each device in the system.")
             .WithTags(Tags)

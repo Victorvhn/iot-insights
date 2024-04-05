@@ -10,11 +10,12 @@ internal class Endpoint : IEndpoint
 
     public void MapEndpoint(IEndpointRouteBuilder app)
     {
-        app.MapPost("authentication/sign-in", async (HttpContext context, SignInRequest request, ISender sender) =>
+        app.MapPost("authentication/sign-in", async (HttpContext context, SignInRequest request, ISender sender,
+                CancellationToken cancellationToken) =>
             {
                 var command = new SignInCommand(request.Username, request.Password);
 
-                var result = await sender.Send(command);
+                var result = await sender.Send(command, cancellationToken);
 
                 return result switch
                 {

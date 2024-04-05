@@ -35,7 +35,7 @@ internal class Handler(IOptions<AuthenticationOptions> options) : ICommandHandle
 
     private string GenerateJwt(SignInCommand command)
     {
-        var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_authenticationOptions.Secret!));
+        var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_authenticationOptions.Secret));
         var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
         var claims = new[]
         {

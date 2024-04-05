@@ -1,8 +1,5 @@
-using System.Net;
-using System.Net.Http.Json;
 using AutoFixture;
 using FluentAssertions;
-using FluentAssertions.Http;
 using IoT.Insights.Api.Features.Authentication.SignIn.v1;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Testing;
@@ -28,12 +25,16 @@ public class EndpointTests(WebApplicationFactory<Program> factory) : IClassFixtu
 
         // Assert
         response
-            .StatusCode
             .Should()
-            .Be(HttpStatusCode.BadRequest);
+            .Be400BadRequest();
         response
             .Should()
-            .HaveContentMatching<ProblemDetails>(x => x.Detail == "Invalid username or password");
+            .Satisfy<ProblemDetails>(model =>
+                model
+                    .Detail
+                    .Should()
+                    .Be("Invalid username or password")
+            );
     }
 
     [Fact]
@@ -52,9 +53,16 @@ public class EndpointTests(WebApplicationFactory<Program> factory) : IClassFixtu
         // Assert
         response
             .Should()
-            .BeSuccessful();
+            .BeSuccessful()
+            .And
+            .Be200Ok();
         response
             .Should()
-            .HaveContentMatching<SignInResponse>(x => x.Token != string.Empty);
+            .Satisfy<SignInResponse>(model =>
+                model
+                    .Token
+                    .Should()
+                    .NotBeEmpty()
+            );
     }
 }
