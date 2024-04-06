@@ -16,10 +16,12 @@ internal class Handler(IOptions<AuthenticationOptions> options) : ICommandHandle
     public ValueTask<Result<SignInResponse>> Handle(SignInCommand command, CancellationToken cancellationToken)
     {
         if (!AreCredentialsValid(command))
+        {
             return ValueTask.FromResult(
                 Result.Fail<SignInResponse>("Invalid username or password")
             );
-
+        }
+        
         var token = GenerateJwt(command);
         var response = new SignInResponse(token);
 

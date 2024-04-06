@@ -37,7 +37,7 @@ public class EndpointTests : IClassFixture<WebApplicationFactory<Program>>
     }
 
     [Fact]
-    public async Task It_should_not_return_an_access_token_when_provided_credentials_are_invalid()
+    public async Task It_should_get_rainfall_metrics_by_device()
     {
         // Arrange
         var client = _factory.CreateClient();

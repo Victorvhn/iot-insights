@@ -64,16 +64,20 @@ public class Handler(
             return Result.Ok();
         }
 
-        var rainfallMetrics =
+        var rainfallMetricsResult =
             await commandTcpClient.ExecuteCommand(data.Url, GetRainfallIntensityCommand, cancellationToken);
-
+        if (rainfallMetricsResult.IsFailed)
+        {
+            return Result.Fail<DeviceInfoWithRainfallMetrics?>(result.Errors);
+        }
+        
         return new DeviceInfoWithRainfallMetrics(
             data.DeviceId,
             data.Description,
             data.Manufacturer,
             data.Url,
             data.AvailableCommands,
-            rainfallMetrics
+            rainfallMetricsResult.Value
         );
     }
 
@@ -81,5 +85,5 @@ public class Handler(
         _validDeviceManufacturers.Contains(data.Manufacturer);
 
     private static bool IsOperationAvailable(DeviceInfo data) =>
-        data.AvailableCommands.Any(a => a.Operation == GetRainfallIntensityCommand);
+        data.AvailableCommands.Exists(a => a.Operation == GetRainfallIntensityCommand);
 }
