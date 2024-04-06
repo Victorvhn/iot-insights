@@ -10,6 +10,7 @@ O projeto está organizado seguindo uma estrutura modular, onde cada componente 
 ./
 │
 ├── src/IoT.Insights.Api           # Código-fonte do projeto
+│   ├── IoT.Insights.Api.http      # Exemplos de chamadas HTTP para testes manuais da aplicação
 │   ├── Features/                  # Funcionalidades disponíveis no projeto
 │   ├──── Authentication/          # Funcionalidades relacionadas à autenticação dos usuários
 │   ├────── ...              
@@ -62,3 +63,18 @@ Com essa abordagem, quando o usuário solicitar métricas, a aplicação apenas 
 2. **Cache:** Se considerarmos a implementação anterior das rotinas em background, sabendo que as métricas dos dispositivos atualizam a cada 10 minutos, por exemplo, podemos adicionar um serviço de cache para tornar ainda mais rápido a obtenção desses dados. Com isso, apenas a primeira chamada à aplicação acessaria o banco de dados e armazenaria os dados retornados em memória, e todas as chamadas subsequentes buscariam nesses dados cacheados. Quando a rotina para atualizar métricas fosse executada, os dados de cache seriam invalidados/substituídos, reiniciando assim o ciclo anterior.
 
 3. **Redução de chamadas HTTP:** Se for possível fazer uma alteração na API de consulta de dispositivos, uma opção viável seria modificar a rota de retorno dos dados dos dispositivos. Em vez de precisar buscar uma lista de IDs primeiro e depois realizar uma consulta para cada ID retornado para obter os dados, seria interessante ter uma rota que retorne todos os dispositivos junto com seus respectivos dados, permitindo filtrar pelos dados necessários (por exemplo, fabricante e comandos disponíveis). Isso reduziria significativamente o número de consultas externas.
+
+## Execução e testes
+Para executar a aplicação, você pode utilizar o Docker (`src/IoT.Insights.Api/Dockerfile`) ou a CLI/IDE.
+
+Você pode visualizar/testar a aplicação utilizando o Swagger. Basta acessar `app-url:port/swagger`. Alternativamente, você pode testar diretamente utilizando o arquivo `src/IoT.Insights.Api/IoT.Insights.Api.http`. O arquivo já vem configurado para realizar a autenticação e a obtenção das métricas.
+
+> Para a aplicação funcionar corretamente, você deve alterar o arquivo appsettings.json com os dados necessários solicitados.
+> O retorno das APIs e TelNet devem ser conforme especificado na documentação fornecida para que a aplicação funcione corretamente.
+
+### Acesso
+Para a autenticação na API, utilize os seguintes dados de usuário:
+
+| username | password |
+|----------|----------|
+| admin    | admin    |
