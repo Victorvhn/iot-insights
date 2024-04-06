@@ -1,6 +1,28 @@
-@IoT.Insights.Api_HostAddress = http://localhost:5162
+@IoT.Insights.Api_HostAddress = http://localhost:8080
 
-GET {{IoT.Insights.Api_HostAddress}}/weatherforecast/
-Accept: application/json
+### Sign In
 
-###
+POST {{IoT.Insights.Api_HostAddress}}/api/v1/authentication/sign-in
+Content-Type: application/json
+
+{ 
+  "username": "admin",
+  "password": "admin"
+}
+
+> {%
+    client.test("Request executed successfully", function() {
+        client.assert(response.status === 200, "Response status is not 200");
+    });
+    client.global.set("access-token", response.body.token);
+%}
+
+### Get metrics
+
+< {%
+    request.variables.set("token", client.global.get("access-token"));
+%}
+
+GET {{IoT.Insights.Api_HostAddress}}/api/v1/metrics/rainfall
+Content-Type: application/json
+Authorization: Bearer {{token}}
